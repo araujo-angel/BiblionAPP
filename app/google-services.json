@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "276266186498",
+    "project_id": "biblion-85771",
+    "storage_bucket": "biblion-85771.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:276266186498:android:27e65c5ccda2066baf341b",
+        "android_client_info": {
+          "package_name": "com.example.biblion"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAEcJpSOpryZXzfpeqvmTLtTOea2TGYlTE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
