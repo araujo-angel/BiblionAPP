@@ -2,7 +2,6 @@ package com.example.biblion.Activity.Cart
 
 import androidx.compose.foundation.Image // Importa componente para exibir imagens
 import androidx.compose.foundation.background // Importa componente para fundo de elementos
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column // Importa componente para layout em coluna
 import androidx.compose.foundation.layout.Row // Importa componente para layout em linha
 import androidx.compose.foundation.layout.Spacer // Importa componente para espaçamento
@@ -19,11 +18,8 @@ import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material3.Text // Importa componente para texto
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable // Importa anotação para funções composáveis
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment // Importa alinhamento de componentes
 import androidx.compose.ui.Modifier // Importa modificador para alterar componentes
 import androidx.compose.ui.graphics.Color // Importa classe para cores
@@ -33,19 +29,17 @@ import androidx.compose.ui.res.painterResource // Importa função para obter im
 import androidx.compose.ui.text.font.FontWeight // Importa peso da fonte
 import androidx.compose.ui.unit.dp // Importa unidade de densidade (dp)
 import androidx.compose.ui.unit.sp // Importa unidade de tamanho de fonte (sp)
-import com.example.biblion.Domain.Endereco
-import com.example.biblion.Helper.EnderecoClient
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.biblion.ViewModel.DeliveryViewModel
 import com.example.biblion.R // Importa recursos do projeto
-import kotlinx.coroutines.launch
 
 @Composable
-fun DeliveryInfoBox() {
-    var cep by remember { mutableStateOf("") }
-    var numero by remember { mutableStateOf("") }
-    var numeroErro by remember { mutableStateOf(false) }
-    var cepErro by remember { mutableStateOf(false) }
-    var endereco by remember { mutableStateOf(Endereco()) }
-    val scope = rememberCoroutineScope()
+fun DeliveryInfoBox(deliveryViewModel: DeliveryViewModel = viewModel()) {
+    val cep by deliveryViewModel.cep.collectAsState()
+    val numero by deliveryViewModel.numero.collectAsState()
+    val cepErro by deliveryViewModel.cepErro.collectAsState()
+    val numeroErro by deliveryViewModel.numeroErro.collectAsState()
+    val endereco by deliveryViewModel.endereco.collectAsState()
 
     Column(
         modifier = Modifier
@@ -58,31 +52,13 @@ fun DeliveryInfoBox() {
         Row(verticalAlignment = Alignment.CenterVertically) {
             TextField(
                 value = cep,
-                onValueChange = {
-                    cep = it
-                    cepErro = false
-                },
+                onValueChange = deliveryViewModel::onCepChange,
                 label = { Text("CEP") },
                 modifier = Modifier.weight(1f)
             )
             Spacer(modifier = Modifier.width(8.dp))
             Button(
-                onClick = {
-                    scope.launch {
-                        try {
-                            val result = EnderecoClient.enderecoAPI.getEnderecoByCEP(cep)
-                            if (result.logradouro.isNullOrEmpty()) {
-                                cepErro = true
-                                endereco = Endereco() // reset
-                            } else {
-                                endereco = result
-                                cepErro = false
-                            }
-                        } catch (e: Exception) {
-                            cepErro = true
-                        }
-                    }
-                },
+                onClick = deliveryViewModel::buscarCep,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = colorResource(R.color.pink)
                 )
@@ -91,7 +67,6 @@ fun DeliveryInfoBox() {
             }
         }
 
-        // Erro de CEP
         if (cepErro) {
             Text(
                 text = "CEP inválido ou não encontrado.",
@@ -103,7 +78,6 @@ fun DeliveryInfoBox() {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Campos preenchidos pela API
         Text(text = "Logradouro:")
         TextField(
             value = endereco.logradouro ?: "",
@@ -120,16 +94,12 @@ fun DeliveryInfoBox() {
             modifier = Modifier.fillMaxWidth()
         )
 
-        // Campo de número
         Text(text = "Número:")
         TextField(
             value = numero,
-            onValueChange = {
-                numero = it
-                numeroErro = false
-            },
+            onValueChange = deliveryViewModel::onNumeroChange,
             modifier = Modifier.fillMaxWidth(),
-            label = { Text("Número") },
+            label = { },
             isError = numeroErro
         )
 
@@ -151,12 +121,10 @@ fun DeliveryInfoBox() {
         )
     }
 
-    // Botão "Fazer pedido"
     Button(
         onClick = {
-            numeroErro = numero.isBlank()
-            if (!numeroErro && !cepErro) {
-                // Aqui você pode prosseguir com o pedido
+            if (deliveryViewModel.validarCampos()) {
+                // Prosseguir com o pedido
             }
         },
         shape = RoundedCornerShape(10.dp),
@@ -175,6 +143,7 @@ fun DeliveryInfoBox() {
         )
     }
 }
+
 
 @Composable // Anotação de função composável
 fun InfoItem(title: String, content: String, icon: Painter) { // Função que exibe um item de informação
