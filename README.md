@@ -59,6 +59,24 @@ Desenvolver um aplicativo mobile em **Kotlin** com **Jetpack Compose** que:
 - **Design:** Material Design  
 - **Backend:** Firebase + Firestore  
 - **Plataforma:** Android  
+- **Gerenciamento de Dependências:** Koin  
+- **Persistência Local:** Room  
+
+---
+
+## 🏗 Arquitetura e Padrões  
+
+- **MVVM:** Separação entre UI (`Compose`) e lógica de negócios (`ViewModel`).  
+- **UI State:**  
+  - `MutableLiveData` no `UserViewModel` para login, cadastro e favoritos.  
+  - `StateFlow` no `DeliveryViewModel` para CEP, número e endereço.  
+- **Room:**  
+  - `BookEntity` → representa a tabela de livros.  
+  - `BookDao` → consultas e inserções locais.  
+  - `AppDatabase` → fornece DAO para repositórios.  
+- **Koin:**  
+  - `BiblionApp` inicializa o Koin no `Application`.  
+  - `appModule` fornece `Repositories`, `DAOs`, `Database` e `ViewModels` via injeção de dependência.  
 
 ---
 
