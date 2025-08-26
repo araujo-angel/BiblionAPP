@@ -124,6 +124,6 @@ Desenvolver um aplicativo mobile em **Kotlin** com **Jetpack Compose** que:
    
 ---
 
-##📖 Conclusão
+## 📖 Conclusão
 
 - O Biblion APP busca transformar a experiência de leitores, oferecendo um espaço de curadoria literária aliado a funcionalidades de organização pessoal, de forma intuitiva e acessível.
