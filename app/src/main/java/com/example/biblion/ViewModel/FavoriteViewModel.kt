@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import com.example.biblion.Helper.observeOnce
 
 sealed interface FavoriteUiState {
     object Loading : FavoriteUiState
@@ -26,10 +27,30 @@ class FavoriteViewModel(
     val uiState: StateFlow<FavoriteUiState> = _uiState.asStateFlow()
 
     init {
-        loadFavorites()
-    }
+        // 1. Sincroniza favoritos do Firebase -> Room
+        viewModelScope.launch {
+            bookRepository.fetchFavoritesFromFirebase(userEmail) { ids ->
+                ids.forEach { bookId ->
+                    bookRepository.getBookById(bookId)
+                        .observeOnce { book ->
+                            book?.let {
+                                viewModelScope.launch {
+                                    val entity = FavoriteBookEntity(
+                                        bookId = it.Id.toString(),
+                                        title = it.Title,
+                                        pages = it.Paginas.toString(),
+                                        imagePath = it.ImagePath,
+                                        price = it.Price
+                                    )
+                                    bookRepository.addToFavorites(it, userEmail)
+                                }
+                            }
+                        }
+                }
+            }
+        }
 
-    private fun loadFavorites() {
+        // 2. Observa sempre o Room
         viewModelScope.launch {
             bookRepository.favoriteBooks.collect { favorites ->
                 _uiState.value = if (favorites.isEmpty()) {

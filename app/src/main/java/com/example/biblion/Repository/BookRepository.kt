@@ -1,6 +1,7 @@
 package com.example.biblion.Repository
 
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
 import com.example.biblion.Domain.BookModel
 import com.example.biblion.Helper.FirebaseFavoritesHelper
 import com.example.biblion.Room.FavoriteBookDao
@@ -14,6 +15,10 @@ class BookRepository(
     val favoriteBooks: Flow<List<FavoriteBookEntity>> = favoriteBookDao.getAll()
 
     fun loadBooks(): LiveData<MutableList<BookModel>> = mainRepository.loadBooks()
+
+    fun getBookById(bookId: String): LiveData<BookModel?> {
+        return mainRepository.getBookById(bookId)
+    }
 
     suspend fun addToFavorites(book: BookModel, userEmail: String) {
         val entity = FavoriteBookEntity(
@@ -41,4 +46,18 @@ class BookRepository(
     suspend fun isFavorite(bookId: String): Boolean {
         return favoriteBookDao.getById(bookId) != null
     }
+
+    /**
+     * Busca favoritos do Firebase e devolve para o ViewModel
+     * (quem chama decide como salvar no Room).
+     */
+    fun fetchFavoritesFromFirebase(
+        userEmail: String,
+        onResult: (List<String>) -> Unit
+    ) {
+        FirebaseFavoritesHelper.getUserFavorites(userEmail) { favoriteIds ->
+            onResult(favoriteIds)
+        }
+    }
+
 }
