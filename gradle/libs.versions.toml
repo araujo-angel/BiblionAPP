@@ -17,8 +17,10 @@ constraintlayout = "2.2.1"
 storage = "1.5.0"
 firebaseFirestoreKtx = "25.1.4"
 roomRuntimeAndroid = "2.7.2"
+constraintlayoutComposeAndroid = "1.1.1"
 
 [libraries]
+
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -40,7 +42,12 @@ androidx-activity = { group = "androidx.activity", name = "activity", version.re
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout" }
 androidx-storage = { group = "androidx.test.services", name = "storage", version.ref = "storage" }
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
-androidx-room-runtime-android = { group = "androidx.room", name = "room-runtime-android", version.ref = "roomRuntimeAndroid" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "roomRuntimeAndroid" }
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "roomRuntimeAndroid" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomRuntimeAndroid" }
+room-paging = { group = "androidx.room", name = "room-paging", version.ref = "roomRuntimeAndroid" }
+room-testing = { group = "androidx.room", name = "room-testing", version.ref = "roomRuntimeAndroid" }
+androidx-constraintlayout-compose-android = { group = "androidx.constraintlayout", name = "constraintlayout-compose-android", version.ref = "constraintlayoutComposeAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
