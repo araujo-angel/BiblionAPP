@@ -9,25 +9,22 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class DeliveryViewModel : ViewModel() {
-
     private val _cep = MutableStateFlow("")
     val cep: StateFlow<String> = _cep
 
     private val _numero = MutableStateFlow("")
     val numero: StateFlow<String> = _numero
 
-    private val _cepErro = MutableStateFlow(false)
-    val cepErro: StateFlow<Boolean> = _cepErro
-
     private val _numeroErro = MutableStateFlow(false)
     val numeroErro: StateFlow<Boolean> = _numeroErro
-
-    private val _endereco = MutableStateFlow(Endereco())
-    val endereco: StateFlow<Endereco> = _endereco
+    private val _uiState = MutableStateFlow<DeliveryUIState>(DeliveryUIState.Idle)
+    val uiState: StateFlow<DeliveryUIState> = _uiState
 
     fun onCepChange(newCep: String) {
         _cep.value = newCep
-        _cepErro.value = false
+        if (_uiState.value is DeliveryUIState.Error) {
+            _uiState.value = DeliveryUIState.Idle
+        }
     }
 
     fun onNumeroChange(newNumero: String) {
@@ -37,17 +34,16 @@ class DeliveryViewModel : ViewModel() {
 
     fun buscarCep() {
         viewModelScope.launch {
+            _uiState.value = DeliveryUIState.Loading
             try {
                 val result = EnderecoClient.enderecoAPI.getEnderecoByCEP(_cep.value)
                 if (result.logradouro.isNullOrEmpty()) {
-                    _cepErro.value = true
-                    _endereco.value = Endereco()
+                    _uiState.value = DeliveryUIState.Error("CEP inválido ou não encontrado.")
                 } else {
-                    _endereco.value = result
-                    _cepErro.value = false
+                    _uiState.value = DeliveryUIState.Success(result)
                 }
             } catch (e: Exception) {
-                _cepErro.value = true
+                _uiState.value = DeliveryUIState.Error(e.message ?: "Erro ao buscar CEP")
             }
         }
     }
@@ -55,6 +51,14 @@ class DeliveryViewModel : ViewModel() {
     fun validarCampos(): Boolean {
         val numeroValido = _numero.value.isNotBlank()
         _numeroErro.value = !numeroValido
-        return numeroValido && !_cepErro.value
+
+        return numeroValido && _uiState.value is DeliveryUIState.Success
     }
 }
+sealed class DeliveryUIState {
+    object Idle : DeliveryUIState()
+    data class Success(val endereco: Endereco) : DeliveryUIState()
+    data class Error(val message: String? = null) : DeliveryUIState()
+    object Loading : DeliveryUIState()
+}
+

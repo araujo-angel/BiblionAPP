@@ -32,14 +32,14 @@ import androidx.compose.ui.unit.sp // Importa unidade de tamanho de fonte (sp)
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.biblion.ViewModel.DeliveryViewModel
 import com.example.biblion.R // Importa recursos do projeto
+import com.example.biblion.ViewModel.DeliveryUIState
 
 @Composable
 fun DeliveryInfoBox(deliveryViewModel: DeliveryViewModel = viewModel()) {
     val cep by deliveryViewModel.cep.collectAsState()
     val numero by deliveryViewModel.numero.collectAsState()
-    val cepErro by deliveryViewModel.cepErro.collectAsState()
     val numeroErro by deliveryViewModel.numeroErro.collectAsState()
-    val endereco by deliveryViewModel.endereco.collectAsState()
+    val uiState by deliveryViewModel.uiState.collectAsState()
 
     Column(
         modifier = Modifier
@@ -54,7 +54,8 @@ fun DeliveryInfoBox(deliveryViewModel: DeliveryViewModel = viewModel()) {
                 value = cep,
                 onValueChange = deliveryViewModel::onCepChange,
                 label = { Text("CEP") },
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
+                isError = uiState is DeliveryUIState.Error
             )
             Spacer(modifier = Modifier.width(8.dp))
             Button(
@@ -67,49 +68,63 @@ fun DeliveryInfoBox(deliveryViewModel: DeliveryViewModel = viewModel()) {
             }
         }
 
-        if (cepErro) {
-            Text(
-                text = "CEP inválido ou não encontrado.",
-                color = Color.Red,
-                fontSize = 12.sp,
-                modifier = Modifier.padding(top = 4.dp)
-            )
+        // Tratamento dos diferentes estados
+        when (uiState) {
+            is DeliveryUIState.Loading -> {
+                Text(
+                    text = "Buscando CEP...",
+                    color = Color.Gray,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+            is DeliveryUIState.Error -> {
+                Text(
+                    text = (uiState as DeliveryUIState.Error).message ?: "Erro desconhecido",
+                    color = Color.Red,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+            else -> {}
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Text(text = "Logradouro:")
-        TextField(
-            value = endereco.logradouro ?: "",
-            onValueChange = {},
-            enabled = false,
-            modifier = Modifier.fillMaxWidth()
-        )
+        // Exibir campos de endereço apenas se tiver sucesso
+        if (uiState is DeliveryUIState.Success) {
+            val endereco = (uiState as DeliveryUIState.Success).endereco
 
-        Text(text = "Bairro:")
-        TextField(
-            value = endereco.bairro ?: "",
-            onValueChange = {},
-            enabled = false,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Text(text = "Número:")
-        TextField(
-            value = numero,
-            onValueChange = deliveryViewModel::onNumeroChange,
-            modifier = Modifier.fillMaxWidth(),
-            label = { },
-            isError = numeroErro
-        )
-
-        if (numeroErro) {
-            Text(
-                text = "O número não pode estar vazio.",
-                color = Color.Red,
-                fontSize = 12.sp,
-                modifier = Modifier.padding(top = 2.dp)
+            Text(text = "Logradouro:")
+            TextField(
+                value = endereco.logradouro ?: "",
+                onValueChange = {},
+                enabled = false,
+                modifier = Modifier.fillMaxWidth()
             )
+
+            Text(text = "Bairro:")
+            TextField(
+                value = endereco.bairro ?: "",
+                onValueChange = {},
+                enabled = false,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Text(text = "Número:")
+            TextField(
+                value = numero,
+                onValueChange = deliveryViewModel::onNumeroChange,
+                modifier = Modifier.fillMaxWidth(),
+                isError = numeroErro
+            )
+
+            if (numeroErro) {
+                Text(
+                    text = "O número não pode estar vazio.",
+                    color = Color.Red,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
         }
 
         Divider(modifier = Modifier.padding(vertical = 8.dp))
@@ -143,7 +158,6 @@ fun DeliveryInfoBox(deliveryViewModel: DeliveryViewModel = viewModel()) {
         )
     }
 }
-
 
 @Composable // Anotação de função composável
 fun InfoItem(title: String, content: String, icon: Painter) { // Função que exibe um item de informação
