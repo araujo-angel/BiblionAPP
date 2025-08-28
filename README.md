@@ -30,8 +30,10 @@ Desenvolver um aplicativo mobile em **Kotlin** com **Jetpack Compose** que:
 ### **Incluso**
 - Cadastro e login de usuários (via Firebase);  
 - Catálogo de livros organizado por categorias;  
-- Visualização detalhada de cada livro;  
-- Marcar livros como “preferidos”;  
+- Visualização detalhada de cada livro;
+- Marcar livros como favoritos (com persistência em Firestore e Room);
+- Persistência local de favoritos via Room;
+- Sincronização entre Firestore e banco local. 
 - Adicionar livros ao carrinho;  
 - Tela de carrinho acessível pela barra inferior;  
 - Navegação fluida entre telas;  
@@ -59,7 +61,7 @@ Desenvolver um aplicativo mobile em **Kotlin** com **Jetpack Compose** que:
 - **Design:** Material Design  
 - **Backend:** Firebase + Firestore  
 - **Plataforma:** Android  
-- **Gerenciamento de Dependências:** Koin  
+- **Injeção de Dependência:** Koin  
 - **Persistência Local:** Room  
 
 ---
@@ -67,16 +69,23 @@ Desenvolver um aplicativo mobile em **Kotlin** com **Jetpack Compose** que:
 ## 🏗 Arquitetura e Padrões  
 
 - **MVVM:** Separação entre UI (`Compose`) e lógica de negócios (`ViewModel`).  
-- **UI State:**  
-  - `MutableLiveData` no `UserViewModel` para login, cadastro e favoritos.  
-  - `StateFlow` no `DeliveryViewModel` para CEP, número e endereço.  
+- **UI State:**
+  - `StateFlow` utilizado em ViewModels como `FavoriteViewModel` e `EnderecoViewModel` para refletir estados como Loading, Success, Error, Idle.
+  - Uso de estados imutáveis (sealed classes) para representar o estado da interface com clareza e segurança. 
 - **Room:**  
   - `BookEntity` → representa a tabela de livros.  
   - `BookDao` → consultas e inserções locais.  
   - `AppDatabase` → fornece DAO para repositórios.  
 - **Koin:**  
   - `BiblionApp` inicializa o Koin no `Application`.  
-  - `appModule` fornece `Repositories`, `DAOs`, `Database` e `ViewModels` via injeção de dependência.  
+  - `appModule` fornece `Repositories`, `DAOs`, `Database` e `ViewModels` via injeção de dependência.
+- **Firebase:**
+  - Login, cadastro e autenticação de usuários com Firebase Auth;
+  - Favoritos armazenados por usuário no Firestore;
+  - Dados sincronizados entre Firebase e banco local ao inicializar.
+- **CEP (Endereço):**
+  - Verificação de CEP via consumo de API pública (ViaCEP);
+  - Interface reativa com `CepUiState` para mostrar carregamento, sucesso ou erro.
 
 ---
 
@@ -94,6 +103,10 @@ Desenvolver um aplicativo mobile em **Kotlin** com **Jetpack Compose** que:
 | RF08 | Tela de carrinho acessível pela barra inferior |  
 | RF09 | Persistência de favoritos e carrinho no Firestore |  
 | RF10 | UI baseada em Jetpack Compose e Material Design |  
+| RF11 | Verificação de CEP com API externa             |
+| RF12 | Persistência local de favoritos com Room       |
+| RF13 | Sincronização de favoritos (Firestore ↔️ Room) |
+
 
 ---
 
@@ -125,7 +138,8 @@ Desenvolver um aplicativo mobile em **Kotlin** com **Jetpack Compose** que:
 
 ### **Fase 6 – Interface e Finalização**
 - Aplicar Material Design em todas as telas (RF10)  
-- Testes de usabilidade, responsividade e performance  
+- Testes de usabilidade, responsividade e performance
+- Integração com API de CEP (RF11)
 
 ---
 
