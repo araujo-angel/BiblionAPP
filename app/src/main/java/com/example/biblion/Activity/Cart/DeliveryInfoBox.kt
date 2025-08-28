@@ -39,7 +39,9 @@ fun DeliveryInfoBox(deliveryViewModel: DeliveryViewModel = viewModel()) {
     val cep by deliveryViewModel.cep.collectAsState()
     val numero by deliveryViewModel.numero.collectAsState()
     val numeroErro by deliveryViewModel.numeroErro.collectAsState()
-    val uiState by deliveryViewModel.uiState.collectAsState()
+    val cepErro by deliveryViewModel.cepErro.collectAsState()
+    val carregando by deliveryViewModel.carregando.collectAsState()
+    val endereco by deliveryViewModel.endereco.collectAsState()
 
     Column(
         modifier = Modifier
@@ -55,45 +57,43 @@ fun DeliveryInfoBox(deliveryViewModel: DeliveryViewModel = viewModel()) {
                 onValueChange = deliveryViewModel::onCepChange,
                 label = { Text("CEP") },
                 modifier = Modifier.weight(1f),
-                isError = uiState is DeliveryUIState.Error
+                isError = cepErro
             )
             Spacer(modifier = Modifier.width(8.dp))
             Button(
                 onClick = deliveryViewModel::buscarCep,
+                enabled = !carregando,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = colorResource(R.color.pink)
                 )
             ) {
-                Text(text = "Buscar")
+                Text(text = if (carregando) "Buscando..." else "Buscar")
             }
         }
 
-        // Tratamento dos diferentes estados
-        when (uiState) {
-            is DeliveryUIState.Loading -> {
-                Text(
-                    text = "Buscando CEP...",
-                    color = Color.Gray,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
-            is DeliveryUIState.Error -> {
-                Text(
-                    text = (uiState as DeliveryUIState.Error).message ?: "Erro desconhecido",
-                    color = Color.Red,
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
-            else -> {}
+        // Mostrar mensagem de erro se o CEP não for encontrado
+        if (cepErro) {
+            Text(
+                text = "CEP não encontrado. Verifique o número digitado.",
+                color = Color.Red,
+                fontSize = 12.sp,
+                modifier = Modifier.padding(top = 4.dp)
+            )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Exibir campos de endereço apenas se tiver sucesso
-        if (uiState is DeliveryUIState.Success) {
-            val endereco = (uiState as DeliveryUIState.Success).endereco
+        // Mostrar indicador de carregamento
+        if (carregando) {
+            Text(
+                text = "Buscando CEP...",
+                color = Color.Gray,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
 
+        // Exibir campos de endereço apenas se o CEP for válido
+        if (endereco.logradouro?.isNotBlank() == true) {
             Text(text = "Logradouro:")
             TextField(
                 value = endereco.logradouro ?: "",
@@ -127,6 +127,7 @@ fun DeliveryInfoBox(deliveryViewModel: DeliveryViewModel = viewModel()) {
             }
         }
 
+
         Divider(modifier = Modifier.padding(vertical = 8.dp))
 
         InfoItem(
@@ -142,9 +143,14 @@ fun DeliveryInfoBox(deliveryViewModel: DeliveryViewModel = viewModel()) {
                 // Prosseguir com o pedido
             }
         },
+        enabled = endereco.logradouro?.isNotBlank() == true && numero.isNotBlank(),
         shape = RoundedCornerShape(10.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = colorResource(R.color.pink)
+            containerColor = if (endereco.logradouro?.isNotBlank() == true && numero.isNotBlank()) {
+                colorResource(R.color.pink)
+            } else {
+                Color.Gray
+            }
         ),
         modifier = Modifier
             .padding(vertical = 32.dp)

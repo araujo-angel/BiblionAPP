@@ -1,6 +1,7 @@
 package com.example.biblion.Domain
 
 class Endereco {
+    val erro:Boolean? = false
     var cep:String? = ""
     var logradouro:String? = ""
     var complemento:String? = ""
