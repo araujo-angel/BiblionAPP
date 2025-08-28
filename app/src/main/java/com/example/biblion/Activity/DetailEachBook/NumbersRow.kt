@@ -24,6 +24,7 @@ import androidx.constraintlayout.compose.ConstraintLayout // importa layout de r
 import com.example.biblion.Domain.BookModel // importa o modelo de dado BookModel
 import com.example.biblion.R // importa recursos do projeto
 
+
 @SuppressLint("SuspiciousIndentation") // suprime aviso de indentação suspeita
 @Composable // indica que a função é um componente de UI
 fun NumberRow(

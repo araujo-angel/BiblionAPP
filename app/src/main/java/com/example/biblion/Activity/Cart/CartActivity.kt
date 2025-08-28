@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight // Para definir peso da fonte
 import androidx.compose.ui.text.style.TextAlign // Para alinhar o texto
 import androidx.compose.ui.unit.dp // Unidade de medida para espaçamento
 import androidx.compose.ui.unit.sp // Unidade de medida para tamanho de fonte
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintLayout // Para layouts com restrições
 import com.example.biblion.Domain.BookModel // Modelo de dados de alimentos
 import com.example.biblion.Helper.ManagementCart

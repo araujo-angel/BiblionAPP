@@ -5,8 +5,7 @@ import androidx.room.util.copy
 import com.example.biblion.Domain.UserModel
 import com.example.biblion.Repository.UserRepository
 
-class UserViewModel : ViewModel() {
-    private val repo = UserRepository()
+class UserViewModel(private val repo: UserRepository) : ViewModel() {
     val user = MutableLiveData<UserModel?>()
     val error = MutableLiveData<String>()
 

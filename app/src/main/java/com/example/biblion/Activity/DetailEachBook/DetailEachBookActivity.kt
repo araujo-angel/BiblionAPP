@@ -25,6 +25,9 @@ import com.example.biblion.Helper.ManagementCart // Classe que gerencia o carrin
 import com.example.biblion.Domain.BookModel // Modelo de dados do alimento
 import com.example.biblion.Helper.FirebaseFavoritesHelper
 import com.example.biblion.Helper.TinyDB
+import com.example.biblion.ViewModel.FavoriteViewModel
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 class DetailEachBookActivity : AppCompatActivity() { // Define a atividade que mostra detalhes de um livro
     private lateinit var item: BookModel // Declara variável que armazena o livro, será inicializada depois
@@ -59,7 +62,7 @@ private fun DetailScreen(
     var numberInCart by remember { mutableStateOf(item.numberInCart) } // Mantém quantidade no carrinho como estado
     val context = LocalContext.current
     val userId = remember { TinyDB(context).getString("user_email") }
-
+    val viewModel: FavoriteViewModel = koinViewModel { parametersOf(userId) }
     LaunchedEffect(userId) {
         if (userId.isNotEmpty()) {
             FirebaseFavoritesHelper.getUserFavorites(userId) { favList ->
@@ -106,6 +109,11 @@ private fun DetailScreen(
                             favorites + bookId as String
                         } else {
                             favorites - (bookId as String)
+                        }
+                        if (isNowFavorite) {
+                            viewModel.addFavorite(item)
+                        } else {
+                            viewModel.removeFavorite(bookId)
                         }
                     } else {
                         Log.w("FAV", "Tentativa de favoritar sem usuário logado")

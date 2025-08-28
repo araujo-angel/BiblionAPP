@@ -1,7 +1,9 @@
 package com.example.biblion.Activity.Login
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -25,22 +27,34 @@ import com.example.biblion.Helper.TinyDB
 import com.example.biblion.ViewModel.UserViewModel
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import com.example.biblion.Helper.FirebaseFavoritesHelper
 import com.example.biblion.R
+import com.example.biblion.Repository.BookRepository
+import com.example.biblion.Repository.UserRepository
+import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
+import org.koin.androidx.compose.koinViewModel
 
 class LoginActivity : ComponentActivity() {
+    private val TAG = "LoginActivity"
+    private val bookRepository: BookRepository by inject()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val viewModel = ViewModelProvider(this)[UserViewModel::class.java]
+        try{
         setContent {
-            LoginScreen(viewModel)
+            val viewModel: UserViewModel = koinViewModel()
+            LoginScreen(viewModel, bookRepository)
+        }
+    } catch (e: Exception) {
+            Log.e(TAG, "Error during setContent", e)
+            Toast.makeText(this, "App initialization failed", Toast.LENGTH_SHORT).show()
         }
     }
 }
 
 @Composable
-fun LoginScreen(viewModel: UserViewModel) {
-    val context = LocalContext.current
-
+fun LoginScreen(viewModel: UserViewModel, bookRepository: BookRepository) {
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -48,15 +62,23 @@ fun LoginScreen(viewModel: UserViewModel) {
     val user by viewModel.user.observeAsState()
     val error by viewModel.error.observeAsState()
 
-    // Observa login bem-sucedido
+    val context = LocalContext.current
     LaunchedEffect(user) {
         user?.let {
-            TinyDB(context).putString("user_email", it.email)
-            context.startActivity(Intent(context, MainActivity::class.java))
+            // Navigate to main activity on successful login
+            val intent = Intent(context, MainActivity::class.java)
+            context.startActivity(intent)
+            (context as Activity).finish()
         }
     }
 
-    // Observa erros
+    LaunchedEffect(error) {
+        error?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
     LaunchedEffect(error) {
         error?.let {
             Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
@@ -160,5 +182,23 @@ fun RoundedButton(text: String, onClick: () -> Unit) {
             color = Color.White,
             fontSize = 16.sp
         )
+    }
+}
+fun syncFavoritesOnLogin(userEmail: String, repository: BookRepository) {
+    FirebaseFavoritesHelper.getUserFavorites(userEmail) { favoriteIds ->
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+            favoriteIds.forEach { id ->
+                if (!repository.isFavorite(id)) {
+                    val entity = com.example.biblion.Room.FavoriteBookEntity(
+                        bookId = id,
+                        title = "",
+                        pages = "",
+                        imagePath = "",
+                        price = 0.0
+                    )
+                    repository.favoriteBookDao.insert(entity)
+                }
+            }
+        }
     }
 }

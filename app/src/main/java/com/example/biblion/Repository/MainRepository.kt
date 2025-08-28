@@ -79,7 +79,7 @@ class MainRepository { // define a classe repositório que gerencia os dados
                 TODO("Not yet implemented") // placeholder para tratamento de erro
             }
         })
-        return listData // retorna o LiveData com alimentos filtrados
+        return listData
     }
 
     fun loadBooks(): LiveData<MutableList<BookModel>> {
@@ -102,5 +102,26 @@ class MainRepository { // define a classe repositório que gerencia os dados
         })
 
         return listData
+    }
+    fun getBookById(bookId: String): LiveData<BookModel?> {
+        val result = MutableLiveData<BookModel?>()
+        val ref = firebaseDatabase.getReference("Books")
+
+        // Busca por string (se os IDs estão armazenados como texto)
+        ref.orderByChild("IdString").equalTo(bookId)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    for (childSnapshot in snapshot.children) {
+                        val book = childSnapshot.getValue(BookModel::class.java)
+                        book?.let { result.value = it }
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    // Tratar erro
+                }
+            })
+
+        return result
     }
 }

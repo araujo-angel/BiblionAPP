@@ -7,19 +7,9 @@ import com.example.biblion.Domain.CategoryModel // Importa o modelo de categoria
 import com.example.biblion.Domain.BookModel // Importa o modelo de comida
 import com.example.biblion.Repository.MainRepository // Importa o repositório que busca os dados
 
-class MainViewModel : ViewModel() { // Classe ViewModel que gerencia os dados para a UI
-    private val repository = MainRepository() // Cria uma instância do repositório para buscar os dados
-
-    fun loadBanner(): LiveData<MutableList<BannerModel>> { // Função para carregar a lista de banners
-        return repository.loadBanner() // Retorna os banners obtidos pelo repositório
-    }
-    fun loadCategory(): LiveData<MutableList<CategoryModel>> { // Função para carregar a lista de categorias
-        return repository.loadCategory() // Retorna as categorias obtidas pelo repositório
-    }
-    fun loadFiltered(id: String): LiveData<MutableList<BookModel>> { // Função para carregar alimentos filtrados por ID
-        return repository.loadFiltered(id) // Retorna os alimentos filtrados pelo repositório
-    }
-    fun loadBooks(): LiveData<MutableList<BookModel>> {
-        return repository.loadBooks() // vamos criar isso no repositório também
-    }
+class MainViewModel(private val repository: MainRepository) : ViewModel() {
+    fun loadBooks(): LiveData<MutableList<BookModel>> = repository.loadBooks()
+    fun loadBanner(): LiveData<MutableList<BannerModel>> = repository.loadBanner()
+    fun loadCategory(): LiveData<MutableList<CategoryModel>> = repository.loadCategory()
+    fun loadFiltered(id: String): LiveData<MutableList<BookModel>> = repository.loadFiltered(id)
 }

@@ -23,6 +23,7 @@ import com.example.biblion.Domain.BookModel
 import com.example.biblion.Domain.CategoryModel // importa o modelo de categoria
 import com.example.biblion.Repository.BookRepository
 import com.example.biblion.ViewModel.MainViewModel // importa o ViewModel principal
+import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : AppCompatActivity() { // define a atividade principal estendendo AppCompatActivity
     override fun onCreate(savedInstanceState: Bundle?) { // método chamado na criação da atividade
@@ -37,7 +38,7 @@ class MainActivity : AppCompatActivity() { // define a atividade principal esten
 @Composable
 fun MainScreen() {
     val scaffoldState = rememberScaffoldState()
-    val viewModel = MainViewModel()
+    val viewModel: MainViewModel = koinViewModel()
     val books = remember { mutableStateListOf<BookModel>() }
     val banners = remember { mutableStateListOf<BannerModel>() }
     val categories = remember { mutableStateListOf<CategoryModel>() }
@@ -57,8 +58,6 @@ fun MainScreen() {
         viewModel.loadBooks().observeForever {
             books.clear()
             books.addAll(it)
-            BookRepository.allBooks.clear()
-            BookRepository.allBooks.addAll(it)
         }
     }
 

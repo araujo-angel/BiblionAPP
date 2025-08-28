@@ -18,7 +18,7 @@ class FavoritesActivity : AppCompatActivity() {
 
         setContent {
             FavoriteBooksScreen(
-                userId = userId,
+                userEmail = userId,
                 onBackClick = { finish() }
             )
         }

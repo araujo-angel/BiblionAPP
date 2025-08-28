@@ -1,6 +1,7 @@
 package com.example.biblion.Repository
 
 import com.example.biblion.Domain.UserModel
+import com.example.biblion.Room.FavoriteBookEntity
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 
@@ -63,4 +64,18 @@ class UserRepository {
                 onResult(false)
             }
     }
+    fun syncFavorites(
+        userEmail: String,
+        localFavorites: List<FavoriteBookEntity>,
+        onResult: (Boolean) -> Unit
+    ) {
+        val favoriteIds = localFavorites.map { it.bookId }
+
+        db.collection("users")
+            .document(userEmail)
+            .update("favorites", favoriteIds)
+            .addOnSuccessListener { onResult(true) }
+            .addOnFailureListener { onResult(false) }
+    }
+
 }

@@ -29,23 +29,26 @@ import androidx.compose.ui.unit.sp // unidade de tamanho de fonte
 import androidx.constraintlayout.compose.ConstraintLayout // layout que usa restrições
 import com.example.biblion.R // recursos do projeto
 import com.example.biblion.ViewModel.MainViewModel // ViewModel que gerencia dados
+import org.koin.androidx.compose.koinViewModel
 
 class ItemsListActivity : AppCompatActivity() { // classe que representa a tela de lista de itens
-    private val viewModel = MainViewModel() // instancia o ViewModel para gerenciar os dados
     private var id: String = "" // variável para guardar o id passado na intent
     private var title: String = "" // variável para guardar o título passado na intent
 
     override fun onCreate(savedInstanceState: Bundle?) { // método chamado ao criar a activity
         super.onCreate(savedInstanceState) // chama a implementação pai
-        id = intent.getStringExtra("id") ?: "" // pega o valor do "id" da intent, se não houver, fica vazio
-        title = intent.getStringExtra("title") ?: "" // pega o "title" da intent, se não houver, fica vazio
+        id = intent.getStringExtra("id")
+            ?: "" // pega o valor do "id" da intent, se não houver, fica vazio
+        title = intent.getStringExtra("title")
+            ?: "" // pega o "title" da intent, se não houver, fica vazio
 
-        setContent { // define o conteúdo da tela usando Compose
-            ItemsListScreen( // chama a função que monta a tela
-                title = title, // passa o título
-                onBackClick = { finish() }, // ação ao clicar no botão de voltar
-                viewModel = viewModel, // passa o ViewModel
-                id = id // passa o id
+        setContent {
+            val viewModel: MainViewModel = koinViewModel()
+            ItemsListScreen(
+                title = title,
+                onBackClick = { finish() },
+                viewModel = viewModel,
+                id = id
             )
         }
     }
