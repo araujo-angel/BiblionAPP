@@ -80,7 +80,7 @@ Desenvolver um aplicativo mobile em **Kotlin** com **Jetpack Compose** que:
   - `BiblionApp` inicializa o Koin no `Application`.  
   - `appModule` fornece `Repositories`, `DAOs`, `Database` e `ViewModels` via injeção de dependência.
 - **Firebase:**
-  - Login, cadastro e autenticação de usuários com Firebase Auth;
+  - Login e cadastro de usuários com Firebase;
   - Favoritos armazenados por usuário no Firestore;
   - Dados sincronizados entre Firebase e banco local ao inicializar.
 - **CEP (Endereço):**
