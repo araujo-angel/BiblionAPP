@@ -29,24 +29,23 @@ class FavoriteViewModel(
     init {
         // 1. Sincroniza favoritos do Firebase -> Room
         viewModelScope.launch {
-            bookRepository.fetchFavoritesFromFirebase(userEmail) { ids ->
-                ids.forEach { bookId ->
-                    bookRepository.getBookById(bookId)
-                        .observeOnce { book ->
+            try {
+                bookRepository.fetchFavoritesFromFirebase(userEmail) { ids ->
+                    ids.forEach { bookId ->
+                        bookRepository.getBookById(bookId).observeOnce { book ->
                             book?.let {
                                 viewModelScope.launch {
-                                    val entity = FavoriteBookEntity(
-                                        bookId = it.Id.toString(),
-                                        title = it.Title,
-                                        pages = it.Paginas.toString(),
-                                        imagePath = it.ImagePath,
-                                        price = it.Price
-                                    )
-                                    bookRepository.addToFavorites(it, userEmail)
+                                    val exists = bookRepository.isFavorite(it.Id.toString())
+                                    if (!exists) {
+                                        bookRepository.addToFavorites(it, userEmail)
+                                    }
                                 }
                             }
                         }
+                    }
                 }
+            } catch (e: Exception) {
+                _uiState.value = FavoriteUiState.Error("Erro ao sincronizar favoritos: ${e.message}")
             }
         }
 

@@ -19,7 +19,8 @@ val appModule = module {
             androidContext(),
             AppDatabase::class.java,
             "biblion_db"
-        ).build()
+        ).fallbackToDestructiveMigration(true)
+            .build()
     }
     single { get<AppDatabase>().favoriteBookDao() }
 
